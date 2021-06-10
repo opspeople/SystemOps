@@ -1,0 +1,1 @@
+echo "newpassword" | passwd --stdin username

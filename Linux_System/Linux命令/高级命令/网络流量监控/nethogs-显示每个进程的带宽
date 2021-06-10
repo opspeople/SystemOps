@@ -1,0 +1,11 @@
+nethogs
+	是一个终端下的网络流量监控工具可以直观的显示每个进程占用的带宽。
+下载地址：
+http://sourceforge.net/projects/nethogs/files/nethogs/0.8/nethogs-0.8.0.tar.gz/download
+
+安装：
+	yum  -y install libpcap-devel  ncurses-devel
+
+	解压
+
+	make && make install

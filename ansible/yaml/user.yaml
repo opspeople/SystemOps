@@ -1,0 +1,10 @@
+---
+- hosts:
+  remote_user: root
+  vars:
+    username: xuhua
+  tasks:
+    - name: create user 
+      user: name=xuhua shell=/bin/bash home=/home/xuhua append=yes
+    - name: change user password
+      shell: echo 'Ups@foo5'|passwd --stdin xuhua

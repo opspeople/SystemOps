@@ -1,0 +1,8 @@
+租户信息
+    租户    租户用户名                   密码        租户域名       分机密码
+    电催    xuhua@welljoint.com         1qaz@WSX    cddc.cmbc       Aa123456
+    电商    cdds@cmbc.com               1qaz@WSX    cdds.cmbc       123456
+    保险    cdbx@cmbc.com               1qaz@WSX    cdbx.cmbc       123456
+    商品分期 spfq@cmbc.com              1qaz@WSX    spfq.cmbc       123456
+
+

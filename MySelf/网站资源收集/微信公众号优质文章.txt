@@ -1,0 +1,2 @@
+10分钟部署一个kubernetes集群
+https://mp.weixin.qq.com/s/8JznAEKe6b-wE-kNx7_Svg

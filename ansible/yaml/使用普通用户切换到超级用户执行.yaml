@@ -1,0 +1,11 @@
+---
+- hosts: all
+  remote_user: testuser
+  become: yes
+  become_method: sudo
+  become_user: root
+  tasks: 
+    - name: "create a test dir"
+      shell: /bin/sh -c "mdkir -p /root/testuser"
+
+

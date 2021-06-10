@@ -1,0 +1,42 @@
+#!/usr/bin/bash
+
+一、Prometheus主配置文件
+global:
+  scrape_interval: 15s      # 指定应用程序或服务抓取数据的时间间隔
+  evaluation_interval: 15s  # 指定Prometheus评估规则的频率，包括记录规则(允许预先计算使用频繁且开销大的表达式，并将结果保存为一个新的时间序列数据)和警报规则(允许定义警报条件)
+  external_labels:
+    monitor: 'test-monitor'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+      - targets:
+        # - alertmanager: 9093
+
+rule_file:
+  # - "first.rules"
+  # - "second.rules"
+
+scrape_configs:
+  - job_name: 'node-monitor'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['195.203.190.148:9100']
+        labels:
+          group: 'production'
+
+  - job_name: 'mysql-monitor'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['195.203.190.127:9104']
+        group: 'canary'
+
+
+配置规则以将抓取的数据汇总到新的时间序列中
+新建文件 prometheus.rules.yml
+groups:
+  - name: cpu-node
+    rules:
+    - record: job_instance_mode:node_cpu_seconds:avg_rate5m
+      expr: avg by (job, instance, mode) (rate(node_cpu_seconds_total[5m]))
+      

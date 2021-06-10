@@ -1,0 +1,205 @@
+# 001.Ansible Playbook介绍
+# Playbook与ad-hoc相比，是一种完全不同的运用ansible的方式，类似于saltstack的state状态的文件。ad-hoc无法持久使用，playbook可以持久使用
+# Playbook是由一个或多个play组成的列表，play的主要功能在于将事先归并为一组的主机装扮成事先通过ansible中的task定义好的角色。
+# 从根本上上将，所谓的task无非是调用ansible的一个module。将多个play组织在一个playbook中，即可以让他们联合起来按事先编排好的机制完成某一任务。
+
+# 002.Playbook核心元素
+# Hosts执行的远程主机列表
+# Tasks任务集
+# Varniables 内置变量或自定义变量在playbook中调用
+# Templates模板，即使用模板语法的文件，比如配置文件等
+# Handlers和notify结合使用，由特定条件出发的操作，满足条件方执行，否则不执行
+# tags标签，指定某条任务执行，用于选择运行Playbook中的部分代码
+
+# 003.Playbook语法
+# 在一个playbook中，可以连续三个子号(---)区分多个play。还有选择性的连续三个点号(...)用来表示play的结尾，也可以省略
+# 次行开始正常些playbook的内容，可以先写上描述该playbook的功能
+# 使用 # 注释代码
+# 缩进必须统一，不能空格和tab混用
+# 缩进的级别也必须是一致的，同样的缩进代表同样的级别
+# YAML 文件内容和Linux系统大小写判断方式保持一致，是区分大小写的，k/v的值均需大小写敏感
+# k/v 的值可同行写也可以换行写。同行使用:分割
+# v 可以是个字符串，也可以是一个列表
+# 一个完整的代码块功能需要最少元素包括 name: task
+
+# 004.示例：
+---
+- hosts: 192.168.1.2
+  remote_user: root   # 远程用户
+  vars:
+    http_port: 8080
+  tasks:
+    - name: create new file
+      file: name=/tmp/playtest.txt state=touch
+    - name: create new user
+      user: name=testuser system=yes shell=/sbin/nologin
+    - name: install package
+      yum: name=httpd
+    - name: config httpd
+      template: src=./httpd.conf dest=/etc/conf/httpd.conf
+      notify:
+        - restart apache
+    - name: copy index.html
+      copy: src=/var/www/html/index.html dest=/var/html/index.html
+    - name: start httpd
+      service: name=httpd state=started
+  handlers:
+    - name: restart apache
+      service: name=httpd state=restarted
+
+# 005.palybook的运行方式
+# 选项:
+--check or -C # 只检测可能会发送的改变，但不真正执行操作
+--list-hosts  # 列出运行任务的主机
+--list-tags   # 列出playbook文件中定义所有的tags
+--list-tasks  # 列出playbook问价那种定义的所有任务集
+--limit       # 主机列表，只针对主机列表中的某个主机或者某个组执行
+-f            # 指定并发数，默认为5个
+-t            # 指定tags运行，运行某一个或者多个tags
+-v            # 显示过程 -vv -vvv更详细
+
+# 006.playbook中的元素属性
+# 主机与用户
+---
+- hosts: 192.168.1.2
+  remote_user: root     # 定义要执行该任务的远程用户
+  sudo_user: admin      # 使用sudo授权用户执行该任务
+  sudo: yes             # 使用sudo授权用户执行该任务
+
+# tasks任务列表
+tasks:
+  - name: create new file
+    file: path=/tmp/test01.txt state=touch
+  - name: create new user
+    user: name=testuser state=present
+
+# handlers与Notify
+---
+- hosts: 192.168.1.2
+  remote_user: root
+  tasks:
+    - name: install httpd
+      yum: name=httpd state=installed
+    - name: config httpd
+      template: src=/root/httpd.conf dest=/etc/httpd/conf/httpd.conf
+      notify:
+        - restart httpd
+    - name: start httpd
+      service: name=httpd state=started
+  handlers:
+    - name: restart httpd
+      service: name=httpd state=restarted
+
+# 007.playbook中变量的使用
+# 命令行指定变量
+cat variables.yaml
+---
+- hosts: all
+  remote_user: root
+  tasks:
+    - name: install pkg 
+      yum: name={{ pkg }}
+playbook -e "pkg=httpd" variables.yaml
+
+# hosts文件中定义变量
+cat /etc/ansible/hosts
+[apache]
+192.168.1.2 webdir=/opt/test 
+192.168.1.3
+
+[apache:vars]
+webdir=/web/test
+
+[nginx]
+192.168.1.4[1:2]
+[nginx]
+webdir=/opt/web
+
+cat variables.yaml
+---
+- hosts: all
+  remote_user: root
+  tasks:
+    - name: create webdir
+      file: name={{ webdir }} state=directory
+
+# 执行
+ansible-playbook variables.yaml 
+
+# playbook文件中定义变量
+---
+- hosts: all
+  remote_user: root
+  vars:
+    pkg: nginx
+    dir: /tmp/testdir
+  tasks:
+    - name: install pkg
+      yum: name={{ pkg }} state=installed
+    - name: create new dir
+      file: name={{ dir }} state=directory
+# 执行
+ansible-playbook variables.yaml
+
+# 独立的变量YAML文件中定义
+cat var.yml 
+var1: vsftpd
+var2: httpd
+
+cat variables.yaml
+---
+- hosts: all
+  remote_user: root
+  vars_file:
+    - ./var.yaml # 指定变量文件的path
+  tasks:
+    - name: install package
+      yum: name={{ var1 }}
+    - name: create file
+      file: name=/tmp/{{ var2 }}.log state=touch
+
+# 008.playbook中标签的使用
+cat httpd.yml
+---
+- hosts: all
+  remote_user: root
+  tasks:
+    - name: install httpd
+      yum: name=httpd state=installed
+      tags: inhttpd
+    - name: start httpd
+      service: name=httpd state=started
+      tags: sthttpd
+    - name: restart httpd
+      service: name=httpd state=restarted
+      tags:
+        - rshttpd
+        - rs_httpd
+ansible-playbook -t inhttpd httpd.yml # 指定执行inhttpd标签的任务
+ansible-playbook --skip-tags inhttpd httpd.yml # 跳过inhttpd标签的任务执行其他任务
+
+# 009.playbook中模板的使用
+# template模板为我们提供了动态配置服务，使用jinja2语言，里面支持多种条件判断、循环、逻辑运算、比较操作等。
+# 将template文件放在和playbook文件同级的templates目录下(手动创建)，这样playbook文件中可以直接饮用，会自动去找这个文件。如果放在别的地方，也可以通过绝对路径去指定
+# 模板文件后缀名为.j2
+# 通过template安装httpd
+cat testtmp.yml
+---
+- hosts: all
+  remote_user: root
+  vars:
+    - listen_port: 88
+  tasks:
+    - name: install httpd
+      yum: name=httpd state=installed
+    - name: config httpd
+      template: src=httpd.conf.j2 dest=/etc/httpd/conf/httpd.conf # 使用模板
+      notify:
+        - Restart Httpd
+    - name: Start Httpd
+      service: name=httpd state=started
+
+  handlers:
+    - name: Restart Httpd
+      service: name=httpd state=restarted
+      

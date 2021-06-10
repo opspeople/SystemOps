@@ -1,0 +1,12 @@
+iftop 类似top
+
+下载：
+	http://www.ex-parrot.com/~pdw/iftop/download/iftop-0.17.tar.gz
+
+监控项解释
+TX：发送流量
+RX：接收流量
+TOTAL：总流量
+Cumm：运行 iftop 到目前时间的总流量
+peak：流量峰值
+rates：分别表示过去 2s 10s 40s 的平均流量

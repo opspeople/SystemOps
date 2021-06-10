@@ -1,0 +1,21 @@
+# user for root
+---
+- hosts: webservers
+  remote_users: root
+  tasks:
+    - name: install nginx
+      yum:
+        name: nginx
+        state: latest
+
+
+
+
+# user for xuhua
+---
+- hosts: managers
+  remote_users: xuhua
+  become: yes
+  become_user: root[nginx]
+  become_method: su
+  
