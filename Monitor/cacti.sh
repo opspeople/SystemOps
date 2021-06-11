@@ -1,0 +1,2 @@
+# 基于PHP、MySQL、SNMP及RRDTool开发的网络流量图形分析工具
+# 通过使用SNMP协议获取远端网络设备和相关信息（使用Net-SNMP软件包的snmpget和snmpwalk命令获取）
