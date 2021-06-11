@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+# makefile语法规则
+target:prerequisites
+    command
+    target为需要生成的目标
+    prerequisites为依赖项
+    command为make需要执行的命令（任意的Shell命令），command前必须以tab键开始。
