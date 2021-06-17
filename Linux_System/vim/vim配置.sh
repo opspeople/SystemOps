@@ -7,13 +7,13 @@ set noswapfile
 setencoding=utf-8
 
 显示行号
-setnumber
+set nu
 
 取消换行
-setnowrap
+set nowrap
 
 显示光标当前位置
-setruler
+set ruler
 
 设置缩进
 set cindent
@@ -21,7 +21,7 @@ set tabstop=2
 set shiftwidth=2
 
 突出显示当前行
-setcursorline
+set cursorline
 
 查找
 set ic
@@ -29,7 +29,7 @@ set hls
 set is
 
 左下角显示当前vim模式
-setshowmode
+set showmode
 
 代码折叠
 #启动 vim 时关闭折叠代码
